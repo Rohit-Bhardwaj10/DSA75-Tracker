@@ -88,18 +88,31 @@ async function main() {
     // Charlie is just starting (Day 1)
     
     let daysToSubmit: number[] = [];
+    
+    // Alice: Perfect streak, submitted everything including Sunday X post
     if (u.name.includes('Alice')) {
       daysToSubmit = [1, 2, 3, 4, 5];
-      // Find a Sunday to add
       const sunday = challengeDays.find(d => d.isSunday);
       if (sunday) daysToSubmit.push(sunday.dayNumber);
     }
-    if (u.name.includes('Bob')) daysToSubmit = [1, 3, 4];
+    
+    // Bob: Missed Day 2. Submitted Sunday but FORGOT X Post (Penalty test)
+    if (u.name.includes('Bob')) {
+      daysToSubmit = [1, 3, 4];
+      const sunday = challengeDays.find(d => d.isSunday);
+      if (sunday) daysToSubmit.push(sunday.dayNumber);
+    }
+    
+    // Charlie: Only Day 1 (Massive penalties test)
     if (u.name.includes('Charlie')) daysToSubmit = [1];
 
     for (const dayNum of daysToSubmit) {
       const day = challengeDays.find(d => d.dayNumber === dayNum);
       if (!day) continue;
+
+      // Bob forgets X link on Sunday!
+      const isBobAndSunday = u.name.includes('Bob') && day.isSunday;
+      const xLink = (day.isSunday && !isBobAndSunday) ? `https://x.com/${u.name}/status/123` : null;
 
       const submission = await prisma.submission.upsert({
         where: {
@@ -114,22 +127,23 @@ async function main() {
           challengeDayId: day.id,
           dsaLink: 'https://leetcode.com/problems/two-sum',
           difficulty: dayNum % 3 === 0 ? 'Hard' : dayNum % 2 === 0 ? 'Medium' : 'Easy',
-          xPostLink: day.isSunday ? 'https://x.com/alice/status/123' : null,
+          xPostLink: xLink,
           contestLink: day.isSunday ? 'leetcode.com/contest/123' : null,
-          submittedAt: new Date(day.date.getTime() + 1000 * 60 * 60 * 12) // Noon on that day
+          submittedAt: new Date(day.date.getTime() + 1000 * 60 * 60 * 12)
         }
       });
 
-      // Score them (Admin usually does this, but we'll seed it)
+      // Local score (for reference, though Leaderboard calculates dynamically)
+      // We'll intentionally leave the manual score basic, so we can verify the API does the math
       await prisma.score.upsert({
         where: { submissionId: submission.id },
         update: {},
         create: {
           submissionId: submission.id,
           dsaScore: 5,
-          xPostScore: day.isSunday ? 2 : 0,
+          xPostScore: xLink ? 2 : 0, // 0 if missing
           contestScore: day.isSunday ? 5 : 0,
-          totalScore: 5 + (day.isSunday ? 7 : 0)
+          totalScore: 5 + (xLink ? 2 : 0) + (day.isSunday ? 5 : 0)
         }
       });
     }
