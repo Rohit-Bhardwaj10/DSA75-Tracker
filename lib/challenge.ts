@@ -76,22 +76,22 @@ export function validateSubmissionData(
   }
   
   // Sunday-only fields
-  // if (!isSunday) {
-  //   if (xPostLink) {
-  //     errors.push('X post link can only be submitted on Sundays');
-  //   }
-  //   if (contestLink) {
-  //     errors.push('Contest link can only be submitted on Sundays');
-  //   }
-  // } else {
-  //   // On Sundays, validate if provided
-  //   if (xPostLink && !isValidUrl(xPostLink)) {
-  //     errors.push('X post link must be a valid URL');
-  //   }
-  //   if (contestLink && !isValidUrl(contestLink)) {
-  //     errors.push('Contest link must be a valid URL');
-  //   }
-  // }
+  if (!isSunday) {
+    if (xPostLink) {
+      errors.push('X post link can only be submitted on Sundays');
+    }
+    if (contestLink) {
+      errors.push('Contest link can only be submitted on Sundays');
+    }
+  } else {
+    // On Sundays, validate if provided
+    if (xPostLink && !isValidUrl(xPostLink)) {
+      errors.push('X post link must be a valid URL');
+    }
+    if (contestLink && !isValidUrl(contestLink)) {
+      errors.push('Contest link must be a valid URL');
+    }
+  }
   
   return errors;
 }
