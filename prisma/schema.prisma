@@ -1,0 +1,69 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  USER
+  ADMIN
+}
+
+model User {
+  id          String       @id @default(cuid())
+  name        String
+  email       String       @unique
+  password    String // bcrypt hashed
+  role        Role         @default(USER)
+  createdAt   DateTime     @default(now())
+  submissions Submission[]
+
+  @@index([email])
+}
+
+model ChallengeDay {
+  id          String       @id @default(cuid())
+  dayNumber   Int          @unique // 1-75
+  date        DateTime     @unique @db.Date
+  isSunday    Boolean      @default(false)
+  submissions Submission[]
+
+  @@index([date])
+  @@index([dayNumber])
+}
+
+model Submission {
+  id             String   @id @default(cuid())
+  userId         String
+  challengeDayId String
+  dsaLink        String
+  difficulty     String   @default("Medium") // Easy, Medium, Hard
+  xPostLink      String? // Only for Sundays
+  contestLink    String? // Only for Sundays
+  submittedAt    DateTime @default(now())
+
+  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  challengeDay ChallengeDay @relation(fields: [challengeDayId], references: [id], onDelete: Cascade)
+  score        Score?
+
+  @@unique([userId, challengeDayId]) // One submission per user per day
+  @@index([userId])
+  @@index([challengeDayId])
+  @@index([submittedAt])
+}
+
+model Score {
+  id           String @id @default(cuid())
+  submissionId String @unique
+  dsaScore     Int    @default(0)
+  xPostScore   Int    @default(0)
+  contestScore Int    @default(0)
+  totalScore   Int    @default(0) // Computed: dsaScore + xPostScore + contestScore
+
+  submission Submission @relation(fields: [submissionId], references: [id], onDelete: Cascade)
+
+  @@index([totalScore])
+}

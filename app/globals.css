@@ -1,26 +1,66 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* Minimal Monochrome Dark Theme */
+  --background: #09090b; /* Very dark gray, almost black */
+  --foreground: #e4e4e7; /* Light gray text */
+  
+  --card-bg: #18181b; /* Slightly lighter gray for cards */
+  --border: #27272a; /* Dark border */
+  
+  --primary: #fafafa; /* White-ish for primary actions */
+  --primary-foreground: #18181b; /* Dark text on primary */
+  
+  --muted: #a1a1aa; /* Muted text */
+  --accent: #27272a; /* Accent background */
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  --color-card: var(--card-bg);
+  --color-border: var(--border);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-muted: var(--muted);
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  min-height: 100vh;
+}
+
+/* Minimal Utilities */
+.minimal-card {
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+}
+
+.minimal-input {
+  background: #09090b;
+  border: 1px solid var(--border);
+  color: var(--foreground);
+  transition: border-color 0.2s ease;
+}
+
+.minimal-input:focus {
+  border-color: #52525b; /* Slightly lighter gray on focus */
+  outline: none;
+}
+
+/* Custom Scrollbar - Minimal */
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: #27272a;
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #3f3f46;
 }
