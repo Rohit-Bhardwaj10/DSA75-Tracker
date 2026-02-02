@@ -3,6 +3,8 @@ import { prisma } from '@/lib/prisma';
 import { getUserFromToken } from '@/lib/auth';
 import { canUserSubmitToday, validateSubmissionData } from '@/lib/challenge';
 
+export const dynamic = 'force-dynamic';
+
 export async function POST(request: NextRequest) {
   try {
     // Get token from Authorization header
