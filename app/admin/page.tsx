@@ -270,9 +270,9 @@ export default function AdminDashboard() {
                               placeholder="DSA"
                               value={scoreData.dsaScore}
                               onChange={(e) => setScoreData({ ...scoreData, dsaScore: Number(e.target.value) })}
-                              className="px-2 py-1 text-xs rounded minimal-input"
+                              className="px-2 py-1 text-xs rounded minimal-input w-16"
                             />
-                            {sub.challengeDay.isSunday && (
+                            {(sub.challengeDay.isSunday || sub.xPostLink || sub.contestLink) && (
                               <>
                                 <input
                                   type="number"

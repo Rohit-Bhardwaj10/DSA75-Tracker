@@ -70,6 +70,28 @@ export async function POST(request: NextRequest) {
       }
     });
 
+    // Auto-calculate initial score
+    let xScore = 0;
+    if (challengeDay!.isSunday) {
+      if (xPostLink) xScore = 3;
+      else xScore = -3; // Auto-Penalty for missing X post on Sunday
+    } else {
+       xScore = xPostLink ? 3 : 0;
+    }
+
+    const defaultDsaScore = 0; // Base score is 0 until Admin marks it
+    const contestScoreRec = 0; // Contest score is 0 until Admin marks it
+
+    await prisma.score.create({
+      data: {
+        submissionId: submission.id,
+        dsaScore: defaultDsaScore,
+        xPostScore: xScore,
+        contestScore: contestScoreRec,
+        totalScore: defaultDsaScore + xScore + contestScoreRec
+      }
+    });
+
     return NextResponse.json({
       message: 'Submission created successfully',
       submission

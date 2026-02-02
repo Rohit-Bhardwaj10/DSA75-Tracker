@@ -55,6 +55,7 @@ export async function GET(request: NextRequest) {
     });
 
     const limitDate = new Date();
+    
     // Fetch all challenge days up to today
     const challengeDays = await prisma.challengeDay.findMany({
       where: {
@@ -79,13 +80,6 @@ export async function GET(request: NextRequest) {
         if (sub) {
           // Base score from manual grading
           totalScore += (sub.score?.totalScore || 0);
-
-          // Sunday Check: If Sunday and X Link is missing -> -5
-          if (day.isSunday) {
-            if (!sub.xPostLink) {
-              totalScore -= 5;
-            }
-          }
 
           // Streak Bonus: +1 for submitting
           currentStreak++;
