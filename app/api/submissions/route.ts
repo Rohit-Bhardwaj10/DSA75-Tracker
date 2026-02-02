@@ -106,18 +106,50 @@ export async function GET(request: NextRequest) {
     }
 
     // Users can only see their own submissions
-    const submissions = await prisma.submission.findMany({
+    const limitDate = new Date();
+    
+    // 1. Fetch all challenge days up to today
+    const challengeDays = await prisma.challengeDay.findMany({
+      where: { date: { lte: limitDate } },
+      orderBy: { dayNumber: 'asc' }
+    });
+
+    // 2. Fetch actual submissions
+    const rawSubmissions = await prisma.submission.findMany({
       where: {
         userId: user.id
       },
       include: {
         challengeDay: true,
         score: true
-      },
-      orderBy: {
-        challengeDay: {
-          dayNumber: 'asc'
-        }
+      }
+    });
+
+    // 3. Merge to ensure every day is shown
+    const submissions = challengeDays.map(day => {
+      const sub = rawSubmissions.find(s => s.challengeDayId === day.id);
+      
+      if (sub) {
+        return sub;
+      } else {
+        // Create a virtual "missed" submission object for display
+        return {
+          id: `missed-${day.id}`,
+          userId: user.id,
+          challengeDayId: day.id,
+          dsaLink: '',
+          difficulty: 'Missed',
+          xPostLink: null,
+          contestLink: null,
+          submittedAt: day.date, // Use day date for sorting/display
+          challengeDay: day,
+          score: {
+            dsaScore: -5,
+            xPostScore: 0,
+            contestScore: 0,
+            totalScore: -5
+          }
+        };
       }
     });
 

@@ -54,18 +54,56 @@ export async function GET(request: NextRequest) {
       }
     });
 
+    const limitDate = new Date();
+    // Fetch all challenge days up to today
+    const challengeDays = await prisma.challengeDay.findMany({
+      where: {
+        date: {
+          lte: limitDate
+        }
+      },
+      orderBy: { dayNumber: 'asc' }
+    });
+
     // Calculate leaderboard data
     const leaderboard = users.map((user: any) => {
-      const totalScore = user.submissions.reduce((sum: number, sub: any) => {
-        return sum + (sub.score?.totalScore || 0);
-      }, 0);
+      let totalScore = 0;
+      let currentStreak = 0;
+      // Index submissions by dayId for faster lookup
+      const subMap = new Map();
+      user.submissions.forEach((s: any) => subMap.set(s.challengeDayId, s));
+
+      challengeDays.forEach((day: any) => {
+        const sub = subMap.get(day.id);
+        
+        if (sub) {
+          // Base score from manual grading
+          totalScore += (sub.score?.totalScore || 0);
+
+          // Sunday Check: If Sunday and X Link is missing -> -5
+          if (day.isSunday) {
+            if (!sub.xPostLink) {
+              totalScore -= 5;
+            }
+          }
+
+          // Streak Bonus: +1 for submitting
+          currentStreak++;
+          totalScore += 1;
+        } else {
+          // Missed Day Penalty
+          totalScore -= 5;
+          currentStreak = 0;
+        }
+      });
 
       return {
         userId: user.id,
         name: user.name,
         email: user.email,
         submissionCount: user.submissions.length,
-        totalScore
+        totalScore,
+        currentStreak // Optionally return streak to show in UI
       };
     }).sort((a: any, b: any) => b.totalScore - a.totalScore);
 

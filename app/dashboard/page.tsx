@@ -264,20 +264,25 @@ export default function Dashboard() {
                       <span className={`text-[10px] uppercase font-bold px-1.5 py-0.5 rounded border ${
                         sub.difficulty === 'Hard' ? 'text-red-400 border-red-400/20 bg-red-400/10' :
                         sub.difficulty === 'Medium' ? 'text-yellow-400 border-yellow-400/20 bg-yellow-400/10' :
-                        'text-emerald-400 border-emerald-400/20 bg-emerald-400/10'
+                        sub.difficulty === 'Easy' ? 'text-emerald-400 border-emerald-400/20 bg-emerald-400/10' :
+                        'text-red-500 border-red-500/20 bg-red-500/10' // Missed
                       }`}>
                         {sub.difficulty || 'Medium'}
                       </span>
                     </td>
                     <td className="py-3 px-4">
-                      <a
-                        href={sub.dsaLink}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-white hover:underline text-xs"
-                      >
-                        View Solution
-                      </a>
+                      {sub.difficulty === 'Missed' ? (
+                        <span className="text-zinc-700 text-xs italic">No Submission</span>
+                      ) : (
+                        <a
+                          href={sub.dsaLink}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-white hover:underline text-xs"
+                        >
+                          View Solution
+                        </a>
+                      )}
                     </td>
                     <td className="py-3 px-4">
                       <div className="flex gap-3 text-xs">
